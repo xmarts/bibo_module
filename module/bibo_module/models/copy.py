@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from odoo import models, fields, api, _, tools
 from openerp.exceptions import UserError, RedirectWarning, ValidationError
 from datetime import datetime, date, time, timedelta
@@ -9,12 +8,14 @@ class TicketNomina( models.Model ):
 	_rec_name = 'bar_code'
 	
 	id_prod = fields.Many2one( 'mrp.production','Codigo' )
-	tic_emp = fields.One2many( 'ticket.employee', 'rel_tick', 'Tickets' )
+	#tic_emp_id = fields.Many2one( 'ticket.employee', 'Empleado')
+	tic_emp = fields.Many2one( 'hr.employee' , 'Empleado')
 
 	bar_code = fields.Char( string = 'Codigo de barras' )
 	name_ope = fields.Char( string = 'Nombre de operación' )
 	ref_prod = fields.Many2one('product.template' , string = 'Producto' , related='id_prod.product_id.product_tmpl_id')
-	date_rea = fields.Date( string = 'Fecha de lectura' )
+	date_rea = fields.Date( string = 'Fecha de creación' )
+	date_lec = fields.Date( string = 'Fecha de lectura' )
 	can_prod = fields.Integer( string = 'Cantidad de producto' )
 	cost_tot = fields.Float( string = 'Costo total' )
 	hand_ope = fields.Char( string = 'Mano de obra' )
@@ -25,35 +26,45 @@ class Modules(models.Model):
 	name_mod = fields.Char( string = 'Nombre del modulo' )
 	_rec_name = 'name_mod'
 
-class AddTicketEmployee(models.Model):
+class AddTicketEmployee(models.TransientModel):
 	_name = 'ticket.employee'
 
-	#name = fields.Char('Reference', copy=False, readonly=True, default=lambda x: _('New'))
-	name = fields.Char('Asignacion')
+	name = fields.Char(string="Asignacion", readonly=True, required=True, copy=False, default='Nuevo')
 	employee = fields.Many2one( 'hr.employee' , string = 'Empleado' )
 	busc_bar = fields.Char( string = 'Codigo de barras' )
+	#rel_tick = fields.One2many( 'ticket.nomina','tic_emp_id' )
 
-	rel_tick = fields.One2many( 'ticket.nomina','tic_emp' )
+	#Crea un numero consecutivo a cada asignacion de ticket camp "name" 
+	"""@api.model
+	def create(self, vals):
+		if vals.get('name', 'New') == 'New':
+			vals['name'] = self.env['ir.sequence'].next_by_code('ticket.employee') or 'New'
+		result = super(AddTicketEmployee, self).create(vals)
+		return result"""
 
 	@api.multi
 	def search_ticket(self):
+		invoice = ''
+		asignado = False
 		if self.busc_bar:
 			if self.employee:
 				res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
-
 				if res:
-					#raise UserError('Existe')
-					lis=[]
-					lis.append((0,0,res))
-					self.rel_tick += lis
+					if res.tic_emp.id == False:
+						res.tic_emp = self.employee.id
+						res.date_lec = fields.Date.today()
+						asignado = True
+					else:
+						raise UserError('El ticket ya tiene asignado un empleado')
 				else:
 					raise UserError('Sin resultados')
 			else:
 				raise UserError('Selecciona un empleado para continuar')
 		else:
 			raise UserError('Ingresa algo de en la barra de busqueda')
-
-		
+			
+		if asignado == True:
+			raise UserError('ElTicket' + " " + res.bar_code + 'fue asignado a' + " " + res.tic_emp.name)
 
 class AddCampModules(models.Model):
 	_inherit = 'mrp.production'
@@ -70,6 +81,7 @@ class AddCampModules(models.Model):
 			cost_tota = self.product_qty * self.product_id.standard_price
 			inv_obj = self.env['ticket.nomina']
 			self.ensure_one()
+			invoice = ''
 			i=0
 			for xn in self.move_raw_ids:
 				i+=1
@@ -91,7 +103,10 @@ class AddCampModules(models.Model):
 						})
 		else:
 			raise UserError('Sin datos')
-		return invoice
+		if invoice != '':
+			return invoice
+		else:
+			raise UserError('No hay elementos marcados como mano de obra')
 
 class AddCampHandWork(models.Model):
 	_inherit = 'product.template'
@@ -102,19 +117,3 @@ class AddCampHandWorkProd(models.Model):
 	_inherit = 'product.product'
 
 	hand_work_prod = fields.Boolean( string = 'Mano de obra', related='product_tmpl_id.hand_work' )
-
-		
-"""result = []
-					result.append((1, res.id, 
-						{
-						'id_prod'  : res.id,
-						'bar_code' : res.bar_code, 
-						'name_ope' : res.name_ope,
-						'hand_ope' : res.hand_ope,
-						'ref_prod' : res.ref_prod.id,
-						'date_rea' : res.date_rea,
-						'can_prod' : res.can_prod,
-						'cost_tot' : res.cost_tot,
-						'tic_emp'  : self.employee.id
-						}))
-					self.rel_tick.append(result)"""
