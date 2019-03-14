@@ -8,7 +8,6 @@ class TicketNomina( models.Model ):
 	_rec_name = 'bar_code'
 	
 	id_prod = fields.Many2one( 'mrp.production','Codigo' )
-	#tic_emp_id = fields.Many2one( 'ticket.employee', 'Empleado')
 	tic_emp = fields.Many2one( 'hr.employee' , 'Empleado')
 
 	bar_code = fields.Char( string = 'Codigo de barras' )
@@ -35,51 +34,25 @@ class AddTicketEmployee(models.TransientModel):
 
 	@api.onchange('busc_bar')
 	def search_tickets(self):
-		invoice = ''
 		asignado = False
-		if self.busc_bar:
-			if self.employee:
-				res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
-				if res:
-					if res.tic_emp.id == False:
-						res.tic_emp = self.employee.id
-						res.date_lec = fields.Date.today()
-						asignado = True
-					else:
-						raise UserError('El ticket ya tiene asignado un empleado')
+		if self.busc_bar and self.employee:
+			res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
+			if res:
+				if res.tic_emp.id == False:
+					res.tic_emp = self.employee.id
+					res.date_lec = fields.Date.today()
+					asignado = True
 				else:
-					raise UserError('Sin resultados')
+					raise UserError('El ticket ya tiene asignado un empleado')
 			else:
-				raise UserError('Selecciona un empleado para continuar')
+				raise UserError('Sin resultados')
 		else:
-			raise UserError('Ingresa algo de en la barra de busqueda')
+			raise UserError('Completa los campos')
 			
 		if asignado == True:
-			raise UserError('ElTicket' + " " + res.bar_code + 'fue asignado a' + " " + res.tic_emp.name)
-
-	@api.multi
-	def search_ticket(self):
-		invoice = ''
-		asignado = False
-		if self.busc_bar:
-			if self.employee:
-				res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
-				if res:
-					if res.tic_emp.id == False:
-						res.tic_emp = self.employee.id
-						res.date_lec = fields.Date.today()
-						asignado = True
-					else:
-						raise UserError('El ticket ya tiene asignado un empleado')
-				else:
-					raise UserError('Sin resultados')
-			else:
-				raise UserError('Selecciona un empleado para continuar')
-		else:
-			raise UserError('Ingresa algo de en la barra de busqueda')
-			
-		if asignado == True:
-			raise UserError('ElTicket' + " " + res.bar_code + 'fue asignado a' + " " + res.tic_emp.name)
+			raise UserError('El Ticket ' + " " + res.bar_code + ' fue asignado a ' + " " + res.tic_emp.name)
+			self.write({'employee' : ''})
+			self.write({'busc_bar' : ''})
 
 class AddCampModules(models.Model):
 	_inherit = 'mrp.production'

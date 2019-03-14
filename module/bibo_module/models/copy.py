@@ -8,7 +8,6 @@ class TicketNomina( models.Model ):
 	_rec_name = 'bar_code'
 	
 	id_prod = fields.Many2one( 'mrp.production','Codigo' )
-	#tic_emp_id = fields.Many2one( 'ticket.employee', 'Empleado')
 	tic_emp = fields.Many2one( 'hr.employee' , 'Empleado')
 
 	bar_code = fields.Char( string = 'Codigo de barras' )
@@ -32,39 +31,26 @@ class AddTicketEmployee(models.TransientModel):
 	name = fields.Char(string="Asignacion", readonly=True, required=True, copy=False, default='Nuevo')
 	employee = fields.Many2one( 'hr.employee' , string = 'Empleado' )
 	busc_bar = fields.Char( string = 'Codigo de barras' )
-	#rel_tick = fields.One2many( 'ticket.nomina','tic_emp_id' )
 
-	#Crea un numero consecutivo a cada asignacion de ticket camp "name" 
-	"""@api.model
-	def create(self, vals):
-		if vals.get('name', 'New') == 'New':
-			vals['name'] = self.env['ir.sequence'].next_by_code('ticket.employee') or 'New'
-		result = super(AddTicketEmployee, self).create(vals)
-		return result"""
-
-	@api.multi
-	def search_ticket(self):
-		invoice = ''
+	@api.onchange('busc_bar')
+	def search_tickets(self):
 		asignado = False
-		if self.busc_bar:
-			if self.employee:
-				res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
-				if res:
-					if res.tic_emp.id == False:
-						res.tic_emp = self.employee.id
-						res.date_lec = fields.Date.today()
-						asignado = True
-					else:
-						raise UserError('El ticket ya tiene asignado un empleado')
+		if self.busc_bar and self.employee:
+			res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
+			if res:
+				if res.tic_emp.id == False:
+					res.tic_emp = self.employee.id
+					res.date_lec = fields.Date.today()
+					asignado = True
 				else:
-					raise UserError('Sin resultados')
+					raise UserError('El ticket ya tiene asignado un empleado')
 			else:
-				raise UserError('Selecciona un empleado para continuar')
+				raise UserError('Sin resultados')
 		else:
-			raise UserError('Ingresa algo de en la barra de busqueda')
+			raise UserError('Completa los campos')
 			
 		if asignado == True:
-			raise UserError('ElTicket' + " " + res.bar_code + 'fue asignado a' + " " + res.tic_emp.name)
+			raise UserError('El Ticket ' + " " + res.bar_code + ' fue asignado a ' + " " + res.tic_emp.name)
 
 class AddCampModules(models.Model):
 	_inherit = 'mrp.production'
@@ -83,26 +69,35 @@ class AddCampModules(models.Model):
 			self.ensure_one()
 			invoice = ''
 			i=0
-			for xn in self.move_raw_ids:
-				i+=1
-				val = 0
-				if i > 9:
-					val = str(i)
-				else:
-					val = '0' + str(i)
-				if xn.product_id.hand_work_prod:
-					invoice = inv_obj.create({
-							'id_prod'  : self.id,
-							'bar_code' : self.name + val, 
-							'name_ope' : self.name,
-							'hand_ope' : xn.product_id.name,
-							'ref_prod' : self.product_id.product_tmpl_id,
-							'date_rea' : camp_date,
-							'can_prod' : self.product_qty,
-							'cost_tot' : cost_tota
-						})
+			ii = 1
+			tot = 0
+			for xl in self.move_raw_ids:
+				if xl.product_id.hand_work_prod:
+					tot += 1
+
+			while ii < tot:
+				for xn in self.move_raw_ids:
+					ii += 1
+					i+=1
+					val = 0
+					if i > 9:
+						val = str(ii)
+					else:
+						val = '0' + str(ii)
+					if xn.product_id.hand_work_prod:
+						invoice = inv_obj.create({
+								'id_prod'  : self.id,
+								'bar_code' : self.name + val, 
+								'name_ope' : self.name,
+								'hand_ope' : xn.product_id.name,
+								'ref_prod' : self.product_id.product_tmpl_id,
+								'date_rea' : camp_date,
+								'can_prod' : self.product_qty,
+								'cost_tot' : cost_tota
+							})
 		else:
 			raise UserError('Sin datos')
+
 		if invoice != '':
 			return invoice
 		else:

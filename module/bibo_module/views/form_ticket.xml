@@ -32,11 +32,11 @@
             </div>-->
             <group>
               <group>
-                <field name="busc_bar"/>
-                <field name="employee"/>                
+                <field name="employee"/>
               </group>
               <group>
-                <button name="search_ticket" type="object" string="Buscar y Asignar ticket" class="btn-primary"/>
+                <field name="busc_bar" attrs="{'invisible': [('employee', '=', '')]}"/>
+                <!--<button name="search_ticket" type="object" string="Buscar y Asignar ticket" class="btn-primary"/>-->
               </group>
             </group>
           </sheet>
