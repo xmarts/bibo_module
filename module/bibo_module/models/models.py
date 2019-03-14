@@ -45,6 +45,7 @@ class AddTicketEmployee(models.TransientModel):
 	@api.multi
 	def search_ticket(self):
 		invoice = ''
+		asignado = False
 		if self.busc_bar:
 			if self.employee:
 				res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
@@ -52,6 +53,7 @@ class AddTicketEmployee(models.TransientModel):
 					if res.tic_emp.id == False:
 						res.tic_emp = self.employee.id
 						res.date_lec = fields.Date.today()
+						asignado = True
 					else:
 						raise UserError('El ticket ya tiene asignado un empleado')
 				else:
@@ -60,6 +62,9 @@ class AddTicketEmployee(models.TransientModel):
 				raise UserError('Selecciona un empleado para continuar')
 		else:
 			raise UserError('Ingresa algo de en la barra de busqueda')
+			
+		if asignado == True:
+			raise UserError('ElTicket' + " " + res.bar_code + 'fue asignado a' + " " + res.tic_emp.name)
 
 class AddCampModules(models.Model):
 	_inherit = 'mrp.production'
