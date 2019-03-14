@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_ticket_nomina,ticket.nomina,model_ticket_nomina,base.group_erp_manager,1,1,1,1
+
+access_tk_modules,tk.modules,model_tk_modules,base.group_erp_manager,1,1,1,1
+
+access_ticket_employee,ticket.employee,model_ticket_employee,base.group_erp_manager,1,1,1,1
