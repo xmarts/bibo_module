@@ -87,7 +87,7 @@ class AddCampModules(models.Model):
 							'ref_prod' : self.product_id.product_tmpl_id,
 							'date_rea' : camp_date,
 							'can_prod' : self.product_qty,
-							'cost_tot' : cost_tota
+							'cost_tot' : self.product_qty * xn.product_id.standard_price
 						})
 		else:
 			raise UserError('Sin datos')
