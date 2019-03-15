@@ -51,6 +51,26 @@
       <field name='view_mode'>tree,form</field>
     </record>-->
 
+    <record id="action_modulo_tickets_tree" model="ir.ui.view">
+      <field name="name">Tickets</field>
+      <field name="model">ticket.nomina</field>
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <tree edit="false" create="false">
+          <field name="id_prod" />
+          <field name="tic_emp" />
+          <field name="bar_code" />
+          <field name="name_ope" />
+          <field name="ref_prod" />
+          <field name="date_rea" />
+          <field name="date_lec" />
+          <field name="can_prod" />
+          <field name="cost_tot" />
+          <field name="hand_ope" />
+        </tree>
+      </field>
+    </record>
+
     <record id="tickets_form_Add" model="ir.actions.act_window">
       <field name='name'>Tickets</field>
       <field name='res_model'>ticket.nomina</field>

@@ -1,6 +1,6 @@
 <odoo>
   <data>
-    
+
     <record id="add_camp_modulo" model="ir.ui.view">
       <field name="name">add_camp_modulo</field>
       <field name="model">mrp.production</field>
@@ -18,7 +18,7 @@
       <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
       <field name="arch" type="xml">
         <xpath expr="//button[@name='button_plan']" position="after">
-          <button name="imp_ticket" type="object" string="Generar tickets" class="oe_highlight"/>
+          <button name="imp_ticket" type="object" states="confirmed" string="Generar tickets" class="oe_highlight"/>
         </xpath>
       </field>
     </record>
