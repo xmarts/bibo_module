@@ -6,7 +6,7 @@ from datetime import datetime, date, time, timedelta
 class TicketNomina( models.Model ):
 	_name = 'ticket.nomina'
 	_rec_name = 'bar_code'
-	
+
 	id_prod = fields.Many2one( 'mrp.production','Codigo' )
 	tic_emp = fields.Many2one( 'hr.employee' , 'Empleado')
 
@@ -21,7 +21,7 @@ class TicketNomina( models.Model ):
 
 class Modules(models.Model):
 	_name = 'tk.modules'
-	
+
 	name_mod = fields.Char( string = 'Nombre del modulo' )
 	_rec_name = 'name_mod'
 
@@ -38,21 +38,23 @@ class AddTicketEmployee(models.TransientModel):
 		if self.busc_bar and self.employee:
 			res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
 			if res:
-				if res.tic_emp.id == False:
+				if res.tic_emp:
+					self.write({'busc_bar' : ''})
+					raise UserError('El ticket ya tiene asignado un empleado')
+				else:
 					res.tic_emp = self.employee.id
 					res.date_lec = fields.Date.today()
 					asignado = True
-				else:
-					raise UserError('El ticket ya tiene asignado un empleado')
 			else:
+				self.write({'busc_bar' : ''})
 				raise UserError('Sin resultados')
 		else:
 			raise UserError('Completa los campos')
-			
+
+		self.write({'busc_bar' : ''})
 		if asignado == True:
 			raise UserError('El Ticket ' + " " + res.bar_code + ' fue asignado a ' + " " + res.tic_emp.name)
-			self.write({'employee' : ''})
-			self.write({'busc_bar' : ''})
+
 
 class AddCampModules(models.Model):
 	_inherit = 'mrp.production'
@@ -81,7 +83,7 @@ class AddCampModules(models.Model):
 						val = '0' + str(i)
 					invoice = inv_obj.create({
 							'id_prod'  : self.id,
-							'bar_code' : self.name + val, 
+							'bar_code' : self.name + val,
 							'name_ope' : self.name,
 							'hand_ope' : xn.product_id.name,
 							'ref_prod' : self.product_id.product_tmpl_id,
