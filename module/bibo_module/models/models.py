@@ -72,13 +72,13 @@ class AddCampModules(models.Model):
 			invoice = ''
 			i=0
 			for xn in self.move_raw_ids:
-				i+=1
-				val = 0
-				if i > 9:
-					val = str(i)
-				else:
-					val = '0' + str(i)
 				if xn.product_id.hand_work_prod:
+					i+=1
+					val = 0
+					if i > 9:
+						val = str(i)
+					else:
+						val = '0' + str(i)
 					invoice = inv_obj.create({
 							'id_prod'  : self.id,
 							'bar_code' : self.name + val, 
