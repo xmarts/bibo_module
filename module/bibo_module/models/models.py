@@ -31,29 +31,40 @@ class AddTicketEmployee(models.TransientModel):
 	name = fields.Char(string="Asignacion", readonly=True, required=True, copy=False, default='Nuevo')
 	employee = fields.Many2one( 'hr.employee' , string = 'Empleado' )
 	busc_bar = fields.Char( string = 'Codigo de barras' )
+	mensaje = fields.Char(string="",readonly=True)
 
 	@api.onchange('busc_bar')
 	def search_tickets(self):
 		asignado = False
+		mensaje = ''
 		if self.busc_bar and self.employee:
 			res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
 			if res:
-				if res.tic_emp:
-					self.write({'busc_bar' : ''})
-					raise UserError('El ticket ya tiene asignado un empleado')
-				else:
-					res.tic_emp = self.employee.id
-					res.date_lec = fields.Date.today()
+				if not res.tic_emp:
+					res.write({'tic_emp': self.employee.id})
+					res.write({'date_lec': fields.Date.today()})
 					asignado = True
+				if res.tic_emp:
+					self.busc_bar=''
+					mensaje = 'El ticket ya tiene asignado un empleado'
+					#raise UserError('El ticket ya tiene asignado un empleado')
 			else:
-				self.write({'busc_bar' : ''})
-				raise UserError('Sin resultados')
+				self.busc_bar=''
+				mensaje = 'Sin resultados'
+				#raise UserError('Sin resultados')
 		else:
-			raise UserError('Completa los campos')
+			mensaje = 'Completa los campos'
 
-		self.write({'busc_bar' : ''})
 		if asignado == True:
-			raise UserError('El Ticket ' + " " + res.bar_code + ' fue asignado a ' + " " + res.tic_emp.name)
+			self.busc_bar=''
+			mensaje ='El Ticket ' + " " + res.bar_code + ' fue asignado a ' + " " + res.tic_emp.name
+
+		if mensaje != '':
+			self.mensaje= mensaje
+			self.busc_bar=''
+
+
+
 
 
 class AddCampModules(models.Model):

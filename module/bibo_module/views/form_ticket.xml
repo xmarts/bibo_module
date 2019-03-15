@@ -35,7 +35,8 @@
                 <field name="employee"/>
               </group>
               <group>
-                <field name="busc_bar" attrs="{'invisible': [('employee', '=', '')]}"/>
+                <field name="busc_bar" />
+                <field name="mensaje" />
                 <!--<button name="search_ticket" type="object" string="Buscar y Asignar ticket" class="btn-primary"/>-->
               </group>
             </group>
