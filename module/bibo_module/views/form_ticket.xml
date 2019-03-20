@@ -33,6 +33,7 @@
             <group>
               <group>
                 <field name="employee"/>
+                <field name="sele_fec"/>
               </group>
               <group>
                 <field name="busc_bar" />

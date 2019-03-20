@@ -62,10 +62,10 @@
 							</div>
 							<div class="row" style="margin-bottom:1.5em;">
 								<div class="col-3 text-center">
-									<h6><span style="font-size:35px;" t-field="docs.product_id.default_code"/></h6>
+									<h6><span style="font-size:35px;" t-field="o.product_id.default_code"/></h6>
 								</div>
 								<div class="col-3 text-center">
-									<span style="font-size:35px;" t-field="docs.product_id.name"/>
+									<span style="font-size:35px;" t-field="o.product_id.name"/>
 								</div>
 								<div class="col-3 text-center">
 									<span style="font-size:35px;">Fecha:</span>
@@ -74,9 +74,13 @@
 									<span style="font-size:35px;" t-field="pr.date_rea"/>
 								</div>
 							</div>
-							<div class="row">
-								<div class="col-12 text-center">
+							<hr/>
+							<div class="row" style="margin-top:1.5em;">
+								<div class="col-6 text-center">
 									<span style="font-size:35px;" t-field="pr.hand_ope"/>
+								</div>
+								<div class="col-6 text-center">
+									<span style="font-size:35px;" t-field="o.mod_prod" />
 								</div>
 							</div>
 						</div>
