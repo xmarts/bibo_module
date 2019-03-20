@@ -33,18 +33,19 @@ class AddTicketEmployee(models.TransientModel):
 	name = fields.Char(string="Asignacion", readonly=True, required=True, copy=False, default='Nuevo')
 	employee = fields.Many2one( 'hr.employee' , string = 'Empleado' )
 	busc_bar = fields.Char( string = 'Codigo de barras' )
+	sele_fec = fields.Date( string = 'Selecciona la fecha' )
 	mensaje = fields.Char(string="",readonly=True)
 
 	@api.onchange('busc_bar')
 	def search_tickets(self):
 		asignado = False
 		mensaje = ''
-		if self.busc_bar and self.employee:
+		if self.busc_bar and self.employee and self.sele_fec:
 			res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
 			if res:
 				if not res.tic_emp:
 					res.write({'tic_emp': self.employee.id})
-					res.write({'date_lec': fields.Date.today()})
+					res.write({'date_lec': self.sele_fec})
 					asignado = True
 				if res.tic_emp:
 					self.busc_bar=''
@@ -71,39 +72,48 @@ class AddCampModules(models.Model):
 
 	mod_prod = fields.Many2one( 'tk.modules' , string = 'Modulo' )
 
-	prod_id = fields.One2many('ticket.nomina', 'id_prod' , 'Codigo de produccion')
+	prod_id = fields.One2many('ticket.nomina', 'id_prod' , 'Codigo de produccion' )
+
+	tic_gen = fields.Boolean( string = 'Tickets generados', default = False )
 
 	@api.multi
 	@api.depends('move_raw_ids')
 	def imp_ticket(self, code):
-		if self.move_raw_ids:
-			camp_date = fields.Date.today()
-			cost_tota = self.product_qty * self.product_id.standard_price
-			inv_obj = self.env['ticket.nomina']
-			self.ensure_one()
-			invoice = ''
-			i=0
-			for xn in self.move_raw_ids:
-				if xn.product_id.hand_work_prod:
-					i+=1
-					val = 0
-					if i > 9:
-						val = str(i)
-					else:
-						val = '0' + str(i)
-					invoice = inv_obj.create({
-							'id_prod'  : self.id,
-							'bar_code' : self.name + val,
-							'name_ope' : 'Mano de obra',
-							'hand_ope' : xn.product_id.name,
-							'ref_prod' : self.product_id.product_tmpl_id,
-							'date_rea' : camp_date,
-							'can_prod' : self.product_qty,
-							'cost_tot' : self.product_qty * xn.product_id.standard_price,
-							'id_product_product' : xn.product_id.id
-						})
+		if self.tic_gen == False:
+			self.tic_gen = True
+			if self.move_raw_ids:
+				camp_date = fields.Date.today()
+				cost_tota = self.product_qty * self.product_id.standard_price
+				inv_obj = self.env['ticket.nomina']
+				self.ensure_one()
+				invoice = ''
+				i=0
+				for xn in self.move_raw_ids:
+					if xn.product_id.hand_work_prod:
+						i+=1
+						val = 0
+						if i > 100:
+							val = str(i)
+						elif i > 9:
+							val = '0' + str(i)
+						else:
+							val = '00' + str(i)
+						invoice = inv_obj.create({
+								'id_prod'  : self.id,
+								'bar_code' : self.name + val,
+								'name_ope' : 'Mano de obra',
+								'hand_ope' : xn.product_id.name,
+								'ref_prod' : self.product_id.product_tmpl_id,
+								'date_rea' : camp_date,
+								'can_prod' : self.product_qty,
+								'cost_tot' : self.product_qty * xn.product_id.standard_price,
+								'id_product_product' : xn.product_id.id
+							})
+			else:
+				raise UserError('Sin datos')
 		else:
-			raise UserError('Sin datos')
+			raise UserError('Los tickets ya han sido generados')
+
 		if invoice != '':
 			return invoice
 		else:

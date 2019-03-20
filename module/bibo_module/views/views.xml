@@ -8,6 +8,7 @@
       <field name="arch" type="xml">
         <xpath expr="//field[@name='origin']" position="after">
           <field name="mod_prod"/>
+          <field name="tic_gen" readonly="1" />
         </xpath>
       </field>
     </record>
@@ -18,10 +19,21 @@
       <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
       <field name="arch" type="xml">
         <xpath expr="//button[@name='button_plan']" position="after">
-          <button name="imp_ticket" type="object" states="confirmed" string="Generar tickets" class="oe_highlight"/>
+          <button attrs="{'invisible':[('tic_gen','!=','False')]}" name="imp_ticket" type="object" states="confirmed" string="Generar tickets" class="oe_highlight"/>
         </xpath>
       </field>
     </record>
+
+    <!--<record id="mrp_imp_ticket" model="ir.ui.view">
+        <field name="name">mrp.imp.ticket</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='imp_ticket']" position="attributes">
+                <attribute name="attrs">{'invisible':[('tic_gen','=', (True))]}</attribute>
+            </xpath>
+        </field>
+    </record>-->
 
     <record id="add_camp_hand_work" model="ir.ui.view">
       <field name="name">add_camp_hand_work</field>
@@ -53,7 +65,7 @@
         <xpath expr="//page[3]" position="after">
           <page string="Tabla de operaciones">
             <field name="prod_id">
-              <tree widget="one2many_list">
+              <tree edit="false" create="false" delete="false" widget="one2many_list">
                 <field name="bar_code" />
                 <field name="name_ope" />
                 <field name="hand_ope" />
