@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "bibo_module",
+    'name': "Ticket de empleados BIBO",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        Generación y asignacion de tickets para los empleados de BIBO""",
 
     'description': """
-        Long description of module's purpose
+        Genera tickets de manera seriada para las ordenes de trabajo para luego estos ser asignados a un empleado.
     """,
 
     'author': "Xmarts",
-    'website': "http://www.yourcompany.com",
+    'website': "https://xmarts.com",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml
