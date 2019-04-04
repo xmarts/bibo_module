@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','mrp','hr','account_accountant', 'account'],
+    'depends': ['base','mrp','hr','account_accountant', 'account','sale'],
 
     # always loaded
     'data': [
@@ -30,7 +30,9 @@
         'views/form_ticket.xml',
         'reports/layout.xml',
         'reports/imp_tickets.xml',
-        'reports/order.xml'
+        'reports/order.xml',
+        'reports/sale_report_templates.xml',
+        'reports/account_report_invoice.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
