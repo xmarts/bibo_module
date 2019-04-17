@@ -35,37 +35,44 @@ class AddTicketEmployee(models.TransientModel):
 	busc_bar = fields.Char( string = 'Codigo de barras' )
 	sele_fec = fields.Date( string = 'Selecciona la fecha' )
 	mensaje = fields.Char(string="",readonly=True)
+	comprobacion_error = fields.Boolean(string='Comprobacion error', default = False, compute='to_unlock')
 
 	@api.onchange('busc_bar')
 	def search_tickets(self):
 		asignado = False
 		mensaje = ''
-		if self.busc_bar and self.employee and self.sele_fec:
-			res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
-			if res:
-				if not res.tic_emp:
-					res.write({'tic_emp': self.employee.id})
-					res.write({'date_lec': self.sele_fec})
-					asignado = True
-				if res.tic_emp:
-					self.busc_bar=''
-					mensaje = 'El ticket ya tiene asignado un empleado'
-					#raise UserError('El ticket ya tiene asignado un empleado')
-			else:
-				self.busc_bar=''
-				mensaje = 'Sin resultados'
-				#raise UserError('Sin resultados')
+		if self.comprobacion_error == True:
+			raise UserError('Revisa los campos, o que el ticket no este asignado a un colaborador. Presiona el boton "Desbloquear", para continuar.')
 		else:
-			mensaje = 'Completa los campos'
+			if self.busc_bar and self.employee and self.sele_fec:
+				res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
+				if res:
+					if not res.tic_emp:
+						res.write({'tic_emp': self.employee.id})
+						res.write({'date_lec': self.sele_fec})
+						asignado = True
+					if res.tic_emp:
+						self.busc_bar=''
+						mensaje = 'El ticket '+ res.bar_code +' ya tiene asignado al empleado '+res.tic_emp.name
+						self.comprobacion_error = True	
+				else:
+					self.busc_bar=''
+					mensaje = 'Sin resultados'
+			else:
+				mensaje = 'Completa los campos'
 
 		if asignado == True:
 			self.busc_bar=''
-			#self.employee = False
 			mensaje ='El Ticket ' + " " + res.bar_code + ' fue asignado a ' + " " + res.tic_emp.name
 
 		if mensaje != '':
 			self.mensaje= mensaje
 			self.busc_bar=''
+
+	@api.one
+	@api.depends('comprobacion_error')
+	def to_unlock(self):
+		self.comprobacion_error = False
 
 class AddCampModules(models.Model):
 	_inherit = 'mrp.production'
