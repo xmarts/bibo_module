@@ -135,3 +135,29 @@ class AddCampHandWorkProd(models.Model):
 	_inherit = 'product.product'
 
 	hand_work_prod = fields.Boolean( string = 'Mano de obra', related='product_tmpl_id.hand_work' )
+
+class AddCampHandWorkProd(models.Model):
+	_inherit = 'sale.order'
+
+	no_piezas = fields.Float(string='Numero de Piezas',
+	 readonly=True, compute='_piezas')
+
+
+	@api.one
+	@api.depends('order_line.product_uom_qty')
+	def _piezas(self):
+
+		self.no_piezas = sum(line.product_uom_qty for line in self.order_line)
+	
+	
+
+class AddCampHandWorkProd(models.Model):
+	_inherit = 'account.invoice'
+
+	no_piezas = fields.Float(string='Numero de Piezas', readonly=True,
+	 compute='_compute_piezas', )
+
+	@api.one
+	@api.depends('invoice_line_ids.quantity')
+	def _compute_piezas(self):
+		self.no_piezas = sum(line.quantity for line in self.invoice_line_ids)
