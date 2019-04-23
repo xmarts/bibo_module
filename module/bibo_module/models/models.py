@@ -136,7 +136,7 @@ class AddCampHandWorkProd(models.Model):
 
 	hand_work_prod = fields.Boolean( string = 'Mano de obra', related='product_tmpl_id.hand_work' )
 
-class AddCampHandWorkProd(models.Model):
+'''class AddCampHandWorkProd(models.Model):
 	_inherit = 'sale.order'
 
 	no_piezas = fields.Float(string='Numero de Piezas',
@@ -160,4 +160,4 @@ class AddCampHandWorkProd(models.Model):
 	@api.one
 	@api.depends('invoice_line_ids.quantity')
 	def _compute_piezas(self):
-		self.no_piezas = sum(line.quantity for line in self.invoice_line_ids)
+		self.no_piezas = sum(line.quantity for line in self.invoice_line_ids)'''

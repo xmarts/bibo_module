@@ -80,7 +80,7 @@
       </field>
     </record>
 
-    <record id="add_camp_hand_sale_order" model="ir.ui.view">
+    <!--<record id="add_camp_hand_sale_order" model="ir.ui.view">
       <field name="name">add_camp_sale_order</field>
       <field name="model">sale.order</field>
       <field name="inherit_id" ref="sale.view_order_form"/>
@@ -89,9 +89,9 @@
           <field name="no_piezas"/>
         </xpath>
       </field>
-    </record>
+    </record>-->
 
-       <record id="add_camp_hand_account_invoice" model="ir.ui.view">
+     <!--  <record id="add_camp_hand_account_invoice" model="ir.ui.view">
       <field name="name">add_camp_account_invoice</field>
       <field name="model">account.invoice</field>
       <field name="inherit_id" ref="account.invoice_form"/>
@@ -100,7 +100,7 @@
           <field name="no_piezas"/>
         </xpath>
       </field>
-    </record>
+    </record>-->
 
 
   </data>

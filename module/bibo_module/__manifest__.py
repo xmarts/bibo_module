@@ -28,10 +28,10 @@
         'views/templates.xml',
         'views/form_ticket.xml',
         'reports/layout.xml',
-        'reports/imp_tickets.xml',
-        'reports/order.xml',
-        'reports/sale_report_templates.xml',
-        'reports/account_report_invoice.xml'
+        'reports/imp_tickets.xml'
+        #'reports/order.xml',
+        #'reports/sale_report_templates.xml',
+        #'reports/account_report_invoice.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
