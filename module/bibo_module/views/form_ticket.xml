@@ -41,8 +41,8 @@
           </sheet>
         </form>
         <div class="row pull-right">
-              <div class="col-xs-3" style="padding: 10px;">
-                <button name="d(to_unlock)%" type="action" string="Desbloquear" attrs="{'invisible': [('comprobacion_error', '=', False)]}" class="btn-primary"/>
+             <div class="col-xs-3" style="padding: 10px;">
+               <button name="to_unlock_1" type="object" string="Continuar" attrs="{'invisible': [('comprobacion_error', '=', False)]}" class="btn-primary"/>
               </div>
         </div>
       </field>

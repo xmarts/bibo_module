@@ -35,31 +35,32 @@ class AddTicketEmployee(models.TransientModel):
 	busc_bar = fields.Char( string = 'Codigo de barras' )
 	sele_fec = fields.Date( string = 'Selecciona la fecha' )
 	mensaje = fields.Char(string="",readonly=True)
-	comprobacion_error = fields.Boolean(string='Comprobacion error', default = False, compute='to_unlock')
+	comprobacion_error = fields.Boolean(string='Comprobacion error', default = False)
 
 	@api.onchange('busc_bar')
 	def search_tickets(self):
 		asignado = False
 		mensaje = ''
 		if self.comprobacion_error == True:
-			raise UserError('Revisa los campos, o que el ticket no este asignado a un colaborador. Presiona el boton "Desbloquear", para continuar.')
-		else:
-			if self.busc_bar and self.employee and self.sele_fec:
-				res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
-				if res:
-					if not res.tic_emp:
-						res.write({'tic_emp': self.employee.id})
-						res.write({'date_lec': self.sele_fec})
-						asignado = True
-					if res.tic_emp:
-						self.busc_bar=''
-						mensaje = 'El ticket '+ res.bar_code +' ya tiene asignado al empleado '+res.tic_emp.name
-						self.comprobacion_error = True	
-				else:
+			raise UserError('Revisa los campos o que el ticket no este asignado a un colaborador. Presiona el boton "Continuar", para seguir el proceso.')
+		
+		if self.busc_bar and self.employee and self.sele_fec:
+			res = self.env['ticket.nomina'].search([('bar_code', '=', self.busc_bar)], limit=1)
+			if res:
+				if res.tic_emp:
 					self.busc_bar=''
-					mensaje = 'Sin resultados'
+					mensaje = 'El ticket '+ res.bar_code +' ya tiene asignado al empleado '+res.tic_emp.name
+					self.comprobacion_error = True
+
+				if not res.tic_emp:
+					res.write({'tic_emp': self.employee.id})
+					res.write({'date_lec': self.sele_fec})
+					asignado = True
 			else:
-				mensaje = 'Completa los campos'
+				self.busc_bar=''
+				mensaje = 'Sin resultados'
+		else:
+			mensaje = 'Completa los campos'
 
 		if asignado == True:
 			self.busc_bar=''
@@ -69,10 +70,19 @@ class AddTicketEmployee(models.TransientModel):
 			self.mensaje= mensaje
 			self.busc_bar=''
 
-	@api.one
-	@api.depends('comprobacion_error')
-	def to_unlock(self):
+	@api.multi
+	def to_unlock_1(self, context=None):
+		self.ensure_one()
 		self.comprobacion_error = False
+		return { 
+		 'context': {'default_employee': self.employee.id, 'default_sele_fec': self.sele_fec}, 
+		 'view_type': 'form', 
+		 'view_mode': 'form', 
+		 'res_model': 'ticket.employee', 
+		 'type': 'ir.actions.act_window', 
+		 'target': 'new', 
+		}
+
 
 class AddCampModules(models.Model):
 	_inherit = 'mrp.production'
